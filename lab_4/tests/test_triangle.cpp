@@ -4,7 +4,8 @@
 
 #include <gtest/gtest.h>
 
-using namespace lab4;
+using lab4::Triangle;
+using lab4::Point;
 
 TEST(TriangleTest, DefaultConstructor) {
   Triangle<int> triangle;

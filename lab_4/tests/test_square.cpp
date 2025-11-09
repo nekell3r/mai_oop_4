@@ -4,7 +4,8 @@
 
 #include <gtest/gtest.h>
 
-using namespace lab4;
+using lab4::Square;
+using lab4::Point;
 
 TEST(SquareTest, DefaultConstructor) {
   Square<int> square;

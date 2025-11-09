@@ -10,7 +10,7 @@ namespace lab4 {
 template <Scalar T>
 class Array {
  private:
-  std::shared_ptr<Figure<T>*[]> data_;
+  std::shared_ptr<std::shared_ptr<Figure<T>>[]> data_;
   size_t size_;
   size_t capacity_;
 
@@ -29,7 +29,7 @@ class Array {
   void Add(std::unique_ptr<Figure<T>> figure);
   void Remove(size_t index);
 
-  Figure<T>* operator[](size_t index) const;
+  std::shared_ptr<Figure<T>> operator[](size_t index) const;
 
   size_t GetSize() const;
   double GetTotalArea() const;

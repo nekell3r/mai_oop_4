@@ -7,11 +7,12 @@ namespace lab4 {
 template <Scalar T>
 void Array<T>::Resize() {
   size_t new_cap = capacity_ == 0 ? 1 : capacity_ * 2;
-  auto new_data = std::shared_ptr<Figure<T>*[]>(new Figure<T>*[new_cap]());
+  auto new_data = std::shared_ptr<std::shared_ptr<Figure<T>>[]>(
+      new std::shared_ptr<Figure<T>>[new_cap](),
+      std::default_delete<std::shared_ptr<Figure<T>>[]>());
 
   for (size_t i = 0; i < size_; ++i) {
     new_data[i] = data_[i];
-    data_[i] = nullptr;
   }
 
   data_ = std::move(new_data);
@@ -22,11 +23,7 @@ template <Scalar T>
 Array<T>::Array() : data_(nullptr), size_(0), capacity_(0) {}
 
 template <Scalar T>
-Array<T>::~Array() {
-  for (size_t i = 0; i < size_; ++i) {
-    delete data_[i];
-  }
-}
+Array<T>::~Array() = default;
 
 template <Scalar T>
 Array<T>::Array(Array&& other) noexcept
@@ -38,10 +35,6 @@ Array<T>::Array(Array&& other) noexcept
 template <Scalar T>
 Array<T>& Array<T>::operator=(Array&& other) noexcept {
   if (this != &other) {
-    for (size_t i = 0; i < size_; ++i) {
-      delete data_[i];
-    }
-
     data_ = std::move(other.data_);
     size_ = other.size_;
     capacity_ = other.capacity_;
@@ -57,7 +50,7 @@ void Array<T>::Add(std::unique_ptr<Figure<T>> figure) {
   if (size_ == capacity_) {
     Resize();
   }
-  data_[size_++] = figure.release();
+  data_[size_++] = std::shared_ptr<Figure<T>>(figure.release());
 }
 
 template <Scalar T>
@@ -66,18 +59,16 @@ void Array<T>::Remove(size_t index) {
     throw std::out_of_range("Index out of range");
   }
 
-  delete data_[index];
-
   for (size_t i = index; i < size_ - 1; ++i) {
     data_[i] = data_[i + 1];
   }
 
-  data_[size_ - 1] = nullptr;
+  data_[size_ - 1].reset();
   --size_;
 }
 
 template <Scalar T>
-Figure<T>* Array<T>::operator[](size_t index) const {
+std::shared_ptr<Figure<T>> Array<T>::operator[](size_t index) const {
   if (index >= size_) {
     throw std::out_of_range("Index out of range");
   }
@@ -93,7 +84,7 @@ template <Scalar T>
 double Array<T>::GetTotalArea() const {
   double total = 0.0;
   for (size_t i = 0; i < size_; ++i) {
-    if (data_[i] != nullptr) {
+    if (data_[i]) {
       total += data_[i]->GetArea();
     }
   }
@@ -103,7 +94,7 @@ double Array<T>::GetTotalArea() const {
 template <Scalar T>
 void Array<T>::PrintAll(std::ostream& os) const {
   for (size_t i = 0; i < size_; ++i) {
-    if (data_[i] != nullptr) {
+    if (data_[i]) {
       os << "Figure " << i << ": ";
       data_[i]->Print(os);
       os << "\n";
@@ -114,7 +105,7 @@ void Array<T>::PrintAll(std::ostream& os) const {
 template <Scalar T>
 void Array<T>::PrintCenters(std::ostream& os) const {
   for (size_t i = 0; i < size_; ++i) {
-    if (data_[i] != nullptr) {
+    if (data_[i]) {
       os << "Figure " << i << " center: " << data_[i]->GetCenter() << "\n";
     }
   }
@@ -123,7 +114,7 @@ void Array<T>::PrintCenters(std::ostream& os) const {
 template <Scalar T>
 void Array<T>::PrintVertices(std::ostream& os) const {
   for (size_t i = 0; i < size_; ++i) {
-    if (data_[i] != nullptr) {
+    if (data_[i]) {
       os << "Figure " << i << " - ";
       data_[i]->GetVertices(os);
       os << "\n";

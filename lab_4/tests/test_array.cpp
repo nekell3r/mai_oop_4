@@ -8,7 +8,11 @@
 #include "square.hpp"
 #include "triangle.hpp"
 
-using namespace lab4;
+using lab4::Array;
+using lab4::Triangle;
+using lab4::Square;
+using lab4::Octagon;
+using lab4::Point;
 
 TEST(ArrayTest, DefaultConstructor) {
   Array<int> array;

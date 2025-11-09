@@ -4,7 +4,8 @@
 
 #include <gtest/gtest.h>
 
-using namespace lab4;
+using lab4::Octagon;
+using lab4::Point;
 
 TEST(OctagonTest, DefaultConstructor) {
   Octagon<int> octagon;
