@@ -10,7 +10,7 @@ namespace lab4 {
 template <Scalar T>
 class Array {
  private:
-  std::shared_ptr<std::shared_ptr<Figure<T>>[]> data_;
+  std::shared_ptr<Figure<T>*[]> data_;
   size_t size_;
   size_t capacity_;
 
