@@ -7,9 +7,7 @@ namespace lab4 {
 template <Scalar T>
 void Array<T>::Resize() {
   size_t new_cap = capacity_ == 0 ? 1 : capacity_ * 2;
-  auto new_data = std::shared_ptr<Figure<T>*[]>(
-      new Figure<T>*[new_cap](),
-      std::default_delete<Figure<T>*[]>());
+  auto new_data = std::make_unique<std::shared_ptr<Figure<T>>[]>(new_cap);
 
   for (size_t i = 0; i < size_; ++i) {
     new_data[i] = data_[i];
@@ -20,14 +18,10 @@ void Array<T>::Resize() {
 }
 
 template <Scalar T>
-Array<T>::Array() : data_(nullptr), size_(0), capacity_(0) {}
+Array<T>::Array() : size_(0), capacity_(0) {}
 
 template <Scalar T>
-Array<T>::~Array() {
-  for (size_t i = 0; i < size_; ++i) {
-    delete data_[i];
-  }
-}
+Array<T>::~Array() = default;
 
 template <Scalar T>
 Array<T>::Array(Array&& other) noexcept
@@ -39,10 +33,6 @@ Array<T>::Array(Array&& other) noexcept
 template <Scalar T>
 Array<T>& Array<T>::operator=(Array&& other) noexcept {
   if (this != &other) {
-    for (size_t i = 0; i < size_; ++i) {
-      delete data_[i];
-    }
-
     data_ = std::move(other.data_);
     size_ = other.size_;
     capacity_ = other.capacity_;
@@ -58,7 +48,7 @@ void Array<T>::Add(std::unique_ptr<Figure<T>> figure) {
   if (size_ == capacity_) {
     Resize();
   }
-  data_[size_++] = figure.release();
+  data_[size_++] = std::shared_ptr<Figure<T>>(figure.release());
 }
 
 template <Scalar T>
@@ -67,13 +57,11 @@ void Array<T>::Remove(size_t index) {
     throw std::out_of_range("Index out of range");
   }
 
-  delete data_[index];
-
   for (size_t i = index; i < size_ - 1; ++i) {
     data_[i] = data_[i + 1];
   }
 
-  data_[size_ - 1] = nullptr;
+  data_[size_ - 1].reset();
   --size_;
 }
 
@@ -82,7 +70,7 @@ std::shared_ptr<Figure<T>> Array<T>::operator[](size_t index) const {
   if (index >= size_) {
     throw std::out_of_range("Index out of range");
   }
-  return std::shared_ptr<Figure<T>>(data_, data_[index]);
+  return data_[index];
 }
 
 template <Scalar T>
